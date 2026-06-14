@@ -37,7 +37,6 @@
             align-items: baseline;
             gap: 8px;
         }
-        /* 标题文字部分：图标＋文字，使用悬挂缩进实现换行后首字对齐 */
         .title-text {
             text-indent: -1em;
             padding-left: 1em;
@@ -182,12 +181,18 @@
             display: none;
         }
 
+        /* 窄屏适配：标签换行后居中 */
         @media (max-width: 480px) {
             .card {
                 padding: 20px 16px;
             }
             h1 {
                 font-size: 1.5rem;
+            }
+            .badge {
+                flex-basis: 100%;
+                text-align: center;
+                margin-top: 4px;
             }
             .ft-value {
                 font-size: 2rem;
