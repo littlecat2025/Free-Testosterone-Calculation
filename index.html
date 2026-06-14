@@ -33,16 +33,24 @@
             color: #1e293b;
             margin-bottom: 6px;
             display: flex;
-            align-items: center;
+            flex-wrap: wrap;
+            align-items: baseline;
             gap: 8px;
         }
-        h1 span {
+        /* 标题文字部分：图标＋文字，使用悬挂缩进实现换行后首字对齐 */
+        .title-text {
+            text-indent: -1em;
+            padding-left: 1em;
+        }
+        .badge {
             background: #eef2ff;
             color: #4f46e5;
             font-size: 0.9rem;
             padding: 2px 12px;
             border-radius: 20px;
             letter-spacing: 0.3px;
+            flex-shrink: 0;
+            white-space: nowrap;
         }
         .subtitle {
             color: #64748b;
@@ -174,7 +182,6 @@
             display: none;
         }
 
-        /* 响应式优化：窄屏时调整卡片的 padding 和字号 */
         @media (max-width: 480px) {
             .card {
                 padding: 20px 16px;
@@ -194,8 +201,8 @@
 <body>
     <div class="card">
         <h1>
-            ⚕️ 血清游离睾酮计算工具
-            <span>Vermeulen</span>
+            <span class="title-text">⚕️ 血清游离睾酮计算工具</span>
+            <span class="badge">Vermeulen法</span>
         </h1>
         <div class="subtitle">基于总睾酮、SHBG和白蛋白浓度</div>
 
@@ -262,7 +269,6 @@
     </div>
 
     <script>
-        // 单位转换因子：目标 → nmol/L (总睾酮)
         const TT_TO_NMOL = {
             'ng/dL': 0.03467,
             'nmol/L': 1,
