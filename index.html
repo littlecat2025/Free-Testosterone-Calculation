@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>血清游离睾酮计算工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #f4f7fa;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+            max-width: 520px;
+            width: 100%;
+            padding: 32px 28px;
+        }
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        h1 span {
+            background: #eef2ff;
+            color: #4f46e5;
+            font-size: 0.9rem;
+            padding: 2px 12px;
+            border-radius: 20px;
+            letter-spacing: 0.3px;
+        }
+        .subtitle {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 28px;
+            border-left: 3px solid #4f46e5;
+            padding-left: 12px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+        input, select {
+            font-size: 1rem;
+            padding: 12px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            background: white;
+            transition: 0.2s;
+            outline: none;
+            min-width: 0;
+        }
+        input:focus, select:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        input {
+            flex: 1.4;
+        }
+        select {
+            flex: 1;
+            cursor: pointer;
+            background: #f8fafc;
+        }
+        .btn {
+            width: 100%;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin: 12px 0 20px;
+            letter-spacing: 0.5px;
+        }
+        .btn:hover {
+            background: #4338ca;
+        }
+        .result-box {
+            background: #f1f5f9;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            display: none;
+        }
+        .result-box.active {
+            display: block;
+        }
+        .ft-main-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: nowrap;
+        }
+        .ft-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.2;
+        }
+        .ft-unit {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #475569;
+            white-space: nowrap;
+        }
+        .ft-detail {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        .ft-detail div {
+            background: white;
+            padding: 10px 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            white-space: nowrap;
+        }
+        .ft-detail span {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .percent {
+            font-size: 0.95rem;
+            color: #475569;
+            margin-top: 6px;
+        }
+        hr {
+            margin: 22px 0 16px;
+            border: 0.5px solid #e2e8f0;
+        }
+        .ref {
+            font-size: 0.72rem;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+        .error-msg {
+            color: #dc2626;
+            font-size: 0.85rem;
+            margin-top: 4px;
+            display: none;
+        }
+
+        /* 响应式优化：窄屏时调整卡片的 padding 和字号 */
+        @media (max-width: 480px) {
+            .card {
+                padding: 20px 16px;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            .ft-value {
+                font-size: 2rem;
+            }
+            .ft-detail {
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>
+            ⚕️ 血清游离睾酮计算工具
+            <span>Vermeulen</span>
+        </h1>
+        <div class="subtitle">基于总睾酮、SHBG和白蛋白浓度</div>
+
+        <!-- 总睾酮 -->
+        <div class="input-group">
+            <label>总睾酮 (Total Testosterone)</label>
+            <div class="input-row">
+                <input type="number" id="ttValue" placeholder="数值" step="any" min="0">
+                <select id="ttUnit">
+                    <option value="ng/dL">ng/dL</option>
+                    <option value="nmol/L" selected>nmol/L</option>
+                    <option value="pg/mL">pg/mL</option>
+                    <option value="ng/mL">ng/mL</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- SHBG -->
+        <div class="input-group">
+            <label>性激素结合球蛋白 (SHBG)</label>
+            <div class="input-row">
+                <input type="number" id="shbgValue" placeholder="数值" step="any" min="0">
+                <select id="shbgUnit">
+                    <option value="nmol/L" selected>nmol/L</option>
+                    <option value="ug/dL">μg/dL</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 白蛋白 -->
+        <div class="input-group">
+            <label>白蛋白 (Albumin)</label>
+            <div class="input-row">
+                <input type="number" id="albValue" placeholder="数值" step="any" min="0" value="43">
+                <select id="albUnit">
+                    <option value="g/L" selected>g/L</option>
+                    <option value="g/dL">g/dL</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="btn" id="calculateBtn">开始计算</button>
+
+        <div class="result-box" id="resultBox">
+            <div class="ft-main-row">
+                <span class="ft-value" id="ftMain">--</span>
+                <span class="ft-unit">pg/mL</span>
+            </div>
+            <div class="ft-detail">
+                <div><span id="ftNgDl">--</span> ng/dL</div>
+                <div><span id="ftPmol">--</span> pmol/L</div>
+            </div>
+            <div class="percent" id="ftPercent">占总睾酮 --%</div>
+        </div>
+
+        <div class="error-msg" id="errorMsg">请输入有效的数字。</div>
+
+        <hr>
+        <div class="ref">
+            <strong>公式：</strong> Vermeulen A, Verdonck L, Kaufman JM. <em>J Clin Endocrinol Metab</em> 1999.<br>
+            结合常数：K<sub>SHBG</sub> = 1×10⁹ L/mol，K<sub>Alb</sub> = 3.6×10⁴ L/mol，白蛋白分子量 69,000 g/mol。<br>
+            默认白蛋白 43 g/L（可根据实际值修改）。单位换算采用标准摩尔质量。
+        </div>
+    </div>
+
+    <script>
+        // 单位转换因子：目标 → nmol/L (总睾酮)
+        const TT_TO_NMOL = {
+            'ng/dL': 0.03467,
+            'nmol/L': 1,
+            'pg/mL': 0.003467,
+            'ng/mL': 3.467
+        };
+        const SHBG_TO_NMOL = {
+            'nmol/L': 1,
+            'ug/dL': 0.10526
+        };
+        const ALB_TO_GL = {
+            'g/L': 1,
+            'g/dL': 10
+        };
+        const K_ALB_RATIO = 3.6e4 / 69000;
+
+        function calculateFT() {
+            const ttInput = parseFloat(document.getElementById('ttValue').value);
+            const shbgInput = parseFloat(document.getElementById('shbgValue').value);
+            const albInput = parseFloat(document.getElementById('albValue').value);
+            const errorEl = document.getElementById('errorMsg');
+            const resultBox = document.getElementById('resultBox');
+
+            if (isNaN(ttInput) || isNaN(shbgInput) || isNaN(albInput) || ttInput < 0 || shbgInput < 0 || albInput <= 0) {
+                errorEl.style.display = 'block';
+                resultBox.classList.remove('active');
+                return;
+            }
+            errorEl.style.display = 'none';
+
+            const ttUnit = document.getElementById('ttUnit').value;
+            const shbgUnit = document.getElementById('shbgUnit').value;
+            const albUnit = document.getElementById('albUnit').value;
+
+            const TT_nmol = ttInput * TT_TO_NMOL[ttUnit];
+            const SHBG_nmol = shbgInput * SHBG_TO_NMOL[shbgUnit];
+            const Alb_gL = albInput * ALB_TO_GL[albUnit];
+
+            const K = 1 + K_ALB_RATIO * Alb_gL;
+            let FT_nmol;
+            if (SHBG_nmol === 0) {
+                FT_nmol = TT_nmol / K;
+            } else {
+                const a = K;
+                const b = K + SHBG_nmol - TT_nmol;
+                const c = -TT_nmol;
+                const discriminant = b * b - 4 * a * c;
+                FT_nmol = discriminant < 0 ? 0 : (-b + Math.sqrt(discriminant)) / (2 * a);
+            }
+
+            const FT_pg_mL = FT_nmol * 288.43;
+            const FT_ng_dL = FT_pg_mL / 10;
+            const FT_pmol_L = FT_nmol * 1000;
+            const percent = (FT_nmol / TT_nmol) * 100;
+
+            document.getElementById('ftMain').textContent = FT_pg_mL.toFixed(1);
+            document.getElementById('ftNgDl').textContent = FT_ng_dL.toFixed(2);
+            document.getElementById('ftPmol').textContent = FT_pmol_L.toFixed(1);
+            document.getElementById('ftPercent').textContent = `占总睾酮 ${percent.toFixed(2)}%`;
+            resultBox.classList.add('active');
+        }
+
+        document.getElementById('calculateBtn').addEventListener('click', calculateFT);
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(inp => {
+            inp.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') calculateFT();
+            });
+        });
+    </script>
+</body>
+</html>
